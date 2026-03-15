@@ -1,0 +1,118 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.isActive == true;
+    }
+    
+    function isValidReservation() {
+      return request.resource.data.keys().hasAll([
+        'reservationCode', 
+        'guestName', 
+        'guestEmail', 
+        'guestPhone',
+        'checkInDate',
+        'checkOutDate',
+        'numberOfGuests',
+        'numberOfNights',
+        'totalAmount',
+        'status',
+        'paymentStatus'
+      ]) &&
+      request.resource.data.guestName is string &&
+      request.resource.data.guestName.size() >= 3 &&
+      request.resource.data.guestEmail is string &&
+      request.resource.data.guestEmail.matches('.*@.*\\..*') &&
+      request.resource.data.numberOfGuests is number &&
+      request.resource.data.numberOfGuests >= 1 &&
+      request.resource.data.numberOfGuests <= 8 &&
+      request.resource.data.totalAmount is number &&
+      request.resource.data.totalAmount >= 0;
+    }
+    
+    function isValidRate() {
+      return request.resource.data.keys().hasAll([
+        'name',
+        'pricePerNight',
+        'startDate',
+        'endDate',
+        'currency',
+        'isActive'
+      ]) &&
+      request.resource.data.pricePerNight is number &&
+      request.resource.data.pricePerNight > 0;
+    }
+    
+    function isValidBlockedDate() {
+      return request.resource.data.keys().hasAll([
+        'startDate',
+        'endDate'
+      ]) &&
+      request.resource.data.startDate is timestamp &&
+      request.resource.data.endDate is timestamp;
+    }
+
+    // Admins collection - only admins can read/write
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow write: if false; // Admins can only be created manually
+    }
+
+    // Settings collection - read by anyone, write by admins only
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Amenities collection - read by anyone, write by admins only
+    match /amenities/{amenityId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Reservations collection
+    match /reservations/{reservationId} {
+      // Anyone can create a reservation (public form)
+      allow create: if isValidReservation() && 
+                      request.resource.data.status == 'pending' &&
+                      request.resource.data.paymentStatus == 'pending';
+      
+      // Only admins can read, update, and delete
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Rates collection
+    match /rates/{rateId} {
+      // Anyone can read active rates
+      allow read: if true;
+      
+      // Only admins can create, update, delete
+      allow create: if isAdmin() && isValidRate();
+      allow update, delete: if isAdmin();
+    }
+
+    // Blocked dates collection
+    match /blockedDates/{blockedDateId} {
+      // Anyone can read blocked dates (for availability check)
+      allow read: if true;
+      
+      // Only admins can create, update, delete
+      allow create: if isAdmin() && isValidBlockedDate();
+      allow update, delete: if isAdmin();
+    }
+
+    // Deny all other access by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
