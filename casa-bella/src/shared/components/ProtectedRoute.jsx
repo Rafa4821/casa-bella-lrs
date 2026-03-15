@@ -18,8 +18,8 @@ export const ProtectedRoute = ({ children }) => {
       isAdmin 
     });
     
-    // Redirigir a login (por ahora a home)
-    return <Navigate to="/" replace state={{ from: location }} />;
+    // Redirigir a login
+    return <Navigate to="/admin/login" replace state={{ from: location }} />;
   }
 
   logger.info('ProtectedRoute: Access granted', { path: location.pathname });

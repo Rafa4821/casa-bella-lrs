@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthStateChange, getCurrentUser } from '../services/authService';
+import { onAuthStateChange, getCurrentUser, signInAdmin, signOutAdmin } from '../services/authService';
 import { logger } from '../utils/logger';
 
 const AuthContext = createContext(null);
@@ -54,10 +54,44 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  const login = async (email, password) => {
+    setLoading(true);
+    try {
+      logger.info('AuthProvider: Attempting login', { email });
+      const adminUser = await signInAdmin(email, password);
+      setUser(adminUser);
+      setIsAdmin(true);
+      logger.info('AuthProvider: Login successful', { uid: adminUser.id });
+    } catch (error) {
+      logger.error('AuthProvider: Login failed', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    setLoading(true);
+    try {
+      logger.info('AuthProvider: Logging out');
+      await signOutAdmin();
+      setUser(null);
+      setIsAdmin(false);
+      logger.info('AuthProvider: Logout successful');
+    } catch (error) {
+      logger.error('AuthProvider: Logout failed', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     user,
     isAdmin,
     loading,
+    login,
+    logout,
   };
 
   return (

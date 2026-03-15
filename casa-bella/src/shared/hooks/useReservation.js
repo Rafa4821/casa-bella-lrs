@@ -85,17 +85,30 @@ export const useReservation = () => {
       if (!checkIn || !checkOut) return;
 
       const nights = calculateNights(checkIn, checkOut);
-      const rate = await getActiveRateForDate(new Date(checkIn));
+      
+      // Intentar obtener la tarifa de Firestore
+      let rate = null;
+      try {
+        rate = await getActiveRateForDate(new Date(checkIn));
+      } catch (rateError) {
+        console.warn('Error fetching rate from Firestore:', rateError);
+      }
 
+      // Si no hay tarifa en Firestore, usar tarifa por defecto
       if (!rate) {
-        setError('No se encontró una tarifa activa para estas fechas. Por favor contacta con nosotros.');
-        return;
+        console.warn('No rate found in Firestore, using default rate');
+        rate = {
+          pricePerNight: 200, // Precio por defecto: $200 por noche
+          name: 'Tarifa Estándar',
+          type: 'standard'
+        };
       }
 
       const pricing = calculateTotalPrice(nights, rate.pricePerNight);
       setPricing(pricing);
       return pricing;
     } catch (err) {
+      console.error('Error calculating price:', err);
       setError('Error al calcular el precio. Por favor intenta de nuevo.');
       return null;
     }
@@ -183,8 +196,13 @@ export const useReservation = () => {
         return;
       }
 
-      if (!pricing) {
-        await calculatePrice(formData.checkIn, formData.checkOut);
+      // Recalcular precio antes de enviar para asegurar que esté actualizado
+      const finalPricing = await calculatePrice(formData.checkIn, formData.checkOut);
+      
+      if (!finalPricing) {
+        setError('No se pudo calcular el precio. Por favor intenta de nuevo.');
+        setLoading(false);
+        return;
       }
 
       const code = generateReservationCode();
@@ -199,7 +217,7 @@ export const useReservation = () => {
         checkOutDate: new Date(formData.checkOut),
         numberOfGuests: parseInt(formData.guests),
         numberOfNights: nights,
-        totalAmount: pricing?.total || 0,
+        totalAmount: finalPricing.total,
         status: 'pending',
         paymentStatus: 'pending',
         paidAmount: 0,

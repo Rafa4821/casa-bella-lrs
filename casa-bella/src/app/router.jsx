@@ -16,6 +16,7 @@ import { ReservationDetailPage } from '../pages/admin/ReservationDetailPage';
 import { RatesPage } from '../pages/admin/RatesPage';
 import { BlockedDatesPage } from '../pages/admin/BlockedDatesPage';
 import { SettingsPage } from '../pages/admin/SettingsPage';
+import { LoginPage } from '../pages/admin/LoginPage';
 
 export const router = createBrowserRouter([
   {
@@ -51,6 +52,10 @@ export const router = createBrowserRouter([
         element: <ReservarPage />,
       },
     ],
+  },
+  {
+    path: '/admin/login',
+    element: <LoginPage />,
   },
   {
     path: '/admin',
