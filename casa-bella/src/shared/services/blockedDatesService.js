@@ -113,3 +113,6 @@ export const isDateBlocked = async (date) => {
   const blockedDates = await getDocuments(COLLECTIONS.BLOCKED_DATES, constraints);
   return blockedDates.length > 0;
 };
+
+// Alias for admin pages compatibility
+export const getAllBlockedDates = getBlockedDates;

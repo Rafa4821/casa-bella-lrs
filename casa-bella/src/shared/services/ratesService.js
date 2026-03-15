@@ -120,3 +120,6 @@ export const getActiveRateForDate = async (date) => {
   
   return standardRates.length > 0 ? standardRates[0] : null;
 };
+
+// Alias for admin pages compatibility
+export const getAllRates = getRates;

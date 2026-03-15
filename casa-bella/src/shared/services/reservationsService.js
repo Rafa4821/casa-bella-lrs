@@ -133,3 +133,7 @@ export const getReservationsByDateRange = async (checkIn, checkOut) => {
   
   return await getDocuments(COLLECTIONS.RESERVATIONS, constraints);
 };
+
+// Aliases for admin pages compatibility
+export const getAllReservations = getReservations;
+export const getReservationById = getReservation;

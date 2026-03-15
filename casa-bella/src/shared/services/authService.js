@@ -137,3 +137,37 @@ export const changeEmail = async (newEmail) => {
     throw handleFirebaseError(error);
   }
 };
+
+/**
+ * Alias for onAuthChange (used by AuthContext)
+ */
+export const onAuthStateChange = onAuthChange;
+
+/**
+ * Get current user (checks if admin)
+ * @returns {Promise<AdminUser|null>}
+ */
+export const getCurrentUser = async () => {
+  const user = auth.currentUser;
+  if (!user) {
+    return null;
+  }
+
+  try {
+    const adminDoc = await findDocumentByField(COLLECTIONS.ADMINS, 'email', user.email);
+    
+    if (adminDoc && adminDoc.isActive) {
+      return {
+        id: user.uid,
+        email: user.email,
+        name: adminDoc.name,
+        role: adminDoc.role,
+        active: adminDoc.isActive,
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    return null;
+  }
+};
