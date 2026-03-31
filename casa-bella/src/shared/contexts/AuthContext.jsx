@@ -58,11 +58,16 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       logger.info('AuthProvider: Attempting login', { email });
+      console.log('AuthContext: Starting login for', email);
+      
       const adminUser = await signInAdmin(email, password);
+      
+      console.log('AuthContext: Login successful, admin user:', adminUser);
       setUser(adminUser);
       setIsAdmin(true);
       logger.info('AuthProvider: Login successful', { uid: adminUser.id });
     } catch (error) {
+      console.error('AuthContext: Login failed with error:', error);
       logger.error('AuthProvider: Login failed', error);
       throw error;
     } finally {

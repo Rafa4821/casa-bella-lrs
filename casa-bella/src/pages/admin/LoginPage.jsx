@@ -34,10 +34,34 @@ export const LoginPage = () => {
     }
 
     try {
+      console.log('Attempting login with:', formData.email);
       await login(formData.email, formData.password);
+      console.log('Login successful');
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message || 'Credenciales inválidas. Por favor intenta de nuevo.');
+      console.error('Login error:', err);
+      
+      // Show detailed error message
+      let errorMessage = 'Error al iniciar sesión. ';
+      
+      if (err.code) {
+        // Firebase error codes
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+          errorMessage = 'Email o contraseña incorrectos.';
+        } else if (err.code === 'auth/invalid-credential') {
+          errorMessage = 'Email o contraseña incorrectos.';
+        } else if (err.code === 'auth/too-many-requests') {
+          errorMessage = 'Demasiados intentos fallidos. Intenta más tarde.';
+        } else if (err.code === 'auth/network-request-failed') {
+          errorMessage = 'Error de conexión. Verifica tu internet.';
+        } else {
+          errorMessage += `Código: ${err.code}`;
+        }
+      } else {
+        errorMessage = err.message || 'Error desconocido. Por favor intenta de nuevo.';
+      }
+      
+      setError(errorMessage);
     }
   };
 

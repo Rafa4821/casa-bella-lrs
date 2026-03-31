@@ -27,24 +27,38 @@ import { COLLECTIONS } from '../constants/collections';
  */
 export const signInAdmin = async (email, password) => {
   try {
+    console.log('authService: Attempting Firebase authentication for', email);
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    console.log('authService: Firebase auth successful, UID:', user.uid);
 
+    console.log('authService: Looking for admin document with email:', email);
     const adminDoc = await findDocumentByField(COLLECTIONS.ADMINS, 'email', email);
+    console.log('authService: Admin document found:', adminDoc);
 
-    if (!adminDoc || !adminDoc.active) {
+    if (!adminDoc) {
+      console.error('authService: No admin document found for email:', email);
       await signOut(auth);
-      throw new Error(ERROR_CODES.AUTH_UNAUTHORIZED);
+      throw new Error('No se encontró un usuario administrador con este email. Por favor contacta al administrador del sistema.');
     }
 
+    console.log('authService: Checking isActive field:', adminDoc.isActive);
+    if (!adminDoc.isActive) {
+      console.error('authService: Admin account is inactive');
+      await signOut(auth);
+      throw new Error('Tu cuenta de administrador está desactivada. Por favor contacta al administrador del sistema.');
+    }
+
+    console.log('authService: Admin login successful');
     return {
       id: user.uid,
       email: user.email,
       name: adminDoc.name,
       role: adminDoc.role,
-      active: adminDoc.active,
+      active: adminDoc.isActive,
     };
   } catch (error) {
+    console.error('authService: Login error:', error);
     throw handleFirebaseError(error);
   }
 };
@@ -69,13 +83,13 @@ export const onAuthChange = (callback) => {
     if (user) {
       const adminDoc = await findDocumentByField(COLLECTIONS.ADMINS, 'email', user.email);
       
-      if (adminDoc && adminDoc.active) {
+      if (adminDoc && adminDoc.isActive) {
         callback({
           id: user.uid,
           email: user.email,
           name: adminDoc.name,
           role: adminDoc.role,
-          active: adminDoc.active,
+          active: adminDoc.isActive,
         });
       } else {
         await signOut(auth);
