@@ -19,31 +19,22 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     logger.info('AuthProvider: Setting up auth listener');
+    console.log('AuthContext: Setting up onAuthStateChange listener');
     
-    const unsubscribe = onAuthStateChange(async (authUser) => {
+    const unsubscribe = onAuthStateChange((authUser) => {
+      console.log('AuthContext: Auth state changed, user:', authUser);
+      
       if (authUser) {
-        try {
-          // Verificar si es admin usando el servicio
-          const adminUser = await getCurrentUser();
-          if (adminUser) {
-            setUser(authUser);
-            setIsAdmin(true);
-            logger.info('AuthProvider: Admin user authenticated', { uid: authUser.uid });
-          } else {
-            // Usuario autenticado pero no es admin
-            setUser(null);
-            setIsAdmin(false);
-            logger.warn('AuthProvider: Authenticated but not admin', { uid: authUser.uid });
-          }
-        } catch (error) {
-          logger.error('AuthProvider: Error verifying admin', error);
-          setUser(null);
-          setIsAdmin(false);
-        }
+        // onAuthChange already verified admin status
+        setUser(authUser);
+        setIsAdmin(true);
+        logger.info('AuthProvider: Admin user authenticated', { uid: authUser.id });
+        console.log('AuthContext: Admin verified and state updated');
       } else {
         setUser(null);
         setIsAdmin(false);
         logger.info('AuthProvider: User logged out');
+        console.log('AuthContext: User logged out, state cleared');
       }
       setLoading(false);
     });
@@ -55,7 +46,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    setLoading(true);
     try {
       logger.info('AuthProvider: Attempting login', { email });
       console.log('AuthContext: Starting login for', email);
@@ -63,15 +53,12 @@ export const AuthProvider = ({ children }) => {
       const adminUser = await signInAdmin(email, password);
       
       console.log('AuthContext: Login successful, admin user:', adminUser);
-      setUser(adminUser);
-      setIsAdmin(true);
+      // Don't manually set state - let the auth listener handle it
       logger.info('AuthProvider: Login successful', { uid: adminUser.id });
     } catch (error) {
       console.error('AuthContext: Login failed with error:', error);
       logger.error('AuthProvider: Login failed', error);
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
