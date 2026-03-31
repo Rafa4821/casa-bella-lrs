@@ -72,6 +72,17 @@ export const PublicHeader = () => {
                   Reservar
                 </Link>
               </li>
+              <li className="nav-item ms-lg-2">
+                <Link
+                  to="/admin"
+                  className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
+                  onClick={() => setIsMenuOpen(false)}
+                  title="Acceso Administrador"
+                >
+                  <span>🔐</span>
+                  <span className="d-none d-lg-inline">Admin</span>
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

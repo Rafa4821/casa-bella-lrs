@@ -43,7 +43,7 @@ export const DashboardPage = () => {
       key: 'code',
       label: 'Código',
       render: (row) => (
-        <div className="font-monospace text-muted small">{row.reservationCode}</div>
+        <div className="font-monospace small" style={{ color: '#6c757d' }}>{row.reservationCode}</div>
       ),
     },
     {
@@ -51,8 +51,8 @@ export const DashboardPage = () => {
       label: 'Huésped',
       render: (row) => (
         <div>
-          <div className="fw-semibold">{row.guestName}</div>
-          <small className="text-muted">{row.guestEmail}</small>
+          <div className="fw-semibold" style={{ color: 'var(--bs-body-color)' }}>{row.guestName}</div>
+          <small style={{ color: '#6c757d' }}>{row.guestEmail}</small>
         </div>
       ),
     },
@@ -61,8 +61,8 @@ export const DashboardPage = () => {
       label: 'Check-in',
       render: (row) => (
         <div>
-          <div className="small">{formatDate(row.checkInDate.toDate())}</div>
-          <small className="text-muted">{row.numberOfNights} noches</small>
+          <div className="small" style={{ color: 'var(--bs-body-color)' }}>{formatDate(row.checkInDate.toDate())}</div>
+          <small style={{ color: '#6c757d' }}>{row.numberOfNights} noches</small>
         </div>
       ),
     },
@@ -74,7 +74,7 @@ export const DashboardPage = () => {
     {
       key: 'total',
       label: 'Total',
-      render: (row) => <span className="fw-semibold">{formatPrice(row.totalAmount)}</span>,
+      render: (row) => <span className="fw-semibold" style={{ color: 'var(--bs-body-color)' }}>{formatPrice(row.totalAmount)}</span>,
     },
     {
       key: 'actions',
@@ -100,6 +100,22 @@ export const DashboardPage = () => {
         <div>
           <h2 className="mb-1">Dashboard</h2>
           <p className="text-muted mb-0">Resumen general de Casa Bella</p>
+        </div>
+        <div className="d-flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => window.open('/', '_blank')}
+          >
+            🌐 Ver Sitio Web
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => window.open('/reservar', '_blank')}
+          >
+            📝 Probar Reservas
+          </Button>
         </div>
       </div>
 
@@ -172,13 +188,13 @@ export const DashboardPage = () => {
                       onClick={() => navigate(`/admin/reservas/${reservation.id}`)}
                     >
                       <div>
-                        <div className="fw-semibold">{reservation.guestName}</div>
-                        <small className="text-muted">
+                        <div className="fw-semibold" style={{ color: 'var(--bs-body-color)' }}>{reservation.guestName}</div>
+                        <small style={{ color: '#6c757d' }}>
                           {formatDate(reservation.checkInDate.toDate())}
                         </small>
                       </div>
                       <div className="text-end">
-                        <div className="small text-muted">{reservation.numberOfGuests} huéspedes</div>
+                        <div className="small" style={{ color: '#6c757d' }}>{reservation.numberOfGuests} huéspedes</div>
                         <div className="small fw-semibold text-primary">
                           {formatPrice(reservation.totalAmount)}
                         </div>

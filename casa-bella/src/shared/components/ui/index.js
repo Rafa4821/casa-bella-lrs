@@ -7,3 +7,4 @@ export { Grid, GridItem, ImageGrid, FeatureGrid } from './Grid';
 export { Table, DataTable } from './Table';
 export { Alert, SuccessAlert, ErrorAlert, WarningAlert, InfoAlert } from './Alert';
 export { Loading, LoadingButton } from './Loading';
+export { CopyButton } from './CopyButton';

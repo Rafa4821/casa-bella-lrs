@@ -11,6 +11,7 @@ import {
   Loading,
   SuccessAlert,
   ErrorAlert,
+  CopyButton,
 } from '../../shared/components/ui';
 import { 
   getReservationById, 
@@ -51,9 +52,21 @@ export const ReservationDetailPage = () => {
     try {
       setSaving(true);
       setError(null);
+      
+      const oldStatus = reservation.status;
       await updateReservationStatus(id, newStatus);
       setReservation({ ...reservation, status: newStatus });
-      setSuccess(`Estado actualizado a: ${getStatusLabel(newStatus)}`);
+      
+      let message = `Estado actualizado a: ${getStatusLabel(newStatus)}`;
+      
+      // Add info about automatic date blocking
+      if (newStatus === 'confirmed' && oldStatus === 'pending') {
+        message += '. Las fechas se han bloqueado automáticamente.';
+      } else if (newStatus === 'cancelled' && oldStatus === 'confirmed') {
+        message += '. Las fechas bloqueadas se han liberado.';
+      }
+      
+      setSuccess(message);
       setSaving(false);
     } catch (error) {
       console.error('Error updating status:', error);
@@ -144,6 +157,10 @@ export const ReservationDetailPage = () => {
               ← Volver
             </Button>
             <h2 className="mb-0">Reserva {reservation.reservationCode}</h2>
+            <CopyButton 
+              text={reservation.reservationCode}
+              label="Código"
+            />
           </div>
           <p className="text-muted mb-0">
             Creada el {formatDate(reservation.createdAt.toDate())}
@@ -179,27 +196,29 @@ export const ReservationDetailPage = () => {
               <div className="row g-3">
                 <div className="col-md-6">
                   <label className="text-muted small mb-1">Nombre Completo</label>
-                  <div className="fw-semibold">{reservation.guestName}</div>
+                  <div className="fw-semibold" style={{ color: 'var(--bs-body-color)' }}>{reservation.guestName}</div>
                 </div>
                 <div className="col-md-6">
                   <label className="text-muted small mb-1">Email</label>
-                  <div className="fw-semibold">
-                    <a href={`mailto:${reservation.guestEmail}`} className="text-decoration-none">
+                  <div className="d-flex align-items-center gap-2">
+                    <a href={`mailto:${reservation.guestEmail}`} style={{ color: 'var(--primary)' }} className="fw-semibold">
                       {reservation.guestEmail}
                     </a>
+                    <CopyButton text={reservation.guestEmail} label="" size="sm" />
                   </div>
                 </div>
                 <div className="col-md-6">
                   <label className="text-muted small mb-1">Teléfono</label>
-                  <div className="fw-semibold">
-                    <a href={`tel:${reservation.guestPhone}`} className="text-decoration-none">
+                  <div className="d-flex align-items-center gap-2">
+                    <a href={`tel:${reservation.guestPhone}`} style={{ color: 'var(--primary)' }} className="fw-semibold">
                       {reservation.guestPhone}
                     </a>
+                    <CopyButton text={reservation.guestPhone} label="" size="sm" />
                   </div>
                 </div>
                 <div className="col-md-6">
                   <label className="text-muted small mb-1">Número de Huéspedes</label>
-                  <div className="fw-semibold">{reservation.numberOfGuests} personas</div>
+                  <div className="fw-semibold" style={{ color: 'var(--bs-body-color)' }}>{reservation.numberOfGuests} personas</div>
                 </div>
               </div>
             </CardBody>
@@ -213,23 +232,23 @@ export const ReservationDetailPage = () => {
               <div className="row g-3">
                 <div className="col-md-6">
                   <label className="text-muted small mb-1">Check-in</label>
-                  <div className="fw-semibold">
+                  <div className="fw-semibold" style={{ color: 'var(--bs-body-color)' }}>
                     {formatDate(reservation.checkInDate.toDate())}
                   </div>
                 </div>
                 <div className="col-md-6">
                   <label className="text-muted small mb-1">Check-out</label>
-                  <div className="fw-semibold">
+                  <div className="fw-semibold" style={{ color: 'var(--bs-body-color)' }}>
                     {formatDate(reservation.checkOutDate.toDate())}
                   </div>
                 </div>
                 <div className="col-md-6">
                   <label className="text-muted small mb-1">Número de Noches</label>
-                  <div className="fw-semibold">{reservation.numberOfNights}</div>
+                  <div className="fw-semibold" style={{ color: 'var(--bs-body-color)' }}>{reservation.numberOfNights}</div>
                 </div>
                 <div className="col-md-6">
                   <label className="text-muted small mb-1">Método de Pago Preferido</label>
-                  <div className="fw-semibold">{reservation.paymentMethod}</div>
+                  <div className="fw-semibold" style={{ color: 'var(--bs-body-color)' }}>{reservation.paymentMethod}</div>
                 </div>
                 {reservation.notes && (
                   <div className="col-12">
@@ -279,9 +298,47 @@ export const ReservationDetailPage = () => {
                 options={statusOptions}
                 disabled={saving}
               />
-              <small className="text-muted d-block mt-2">
-                Actualiza el estado de la reserva
-              </small>
+              
+              <div className="mt-3">
+                <small className="text-muted d-block mb-2">Acciones rápidas:</small>
+                <div className="d-grid gap-2">
+                  {reservation.status === 'pending' && (
+                    <Button 
+                      variant="success" 
+                      size="sm"
+                      onClick={() => handleStatusChange('confirmed')}
+                      disabled={saving}
+                    >
+                      ✓ Confirmar Reserva
+                    </Button>
+                  )}
+                  {reservation.status === 'confirmed' && (
+                    <Button 
+                      variant="primary" 
+                      size="sm"
+                      onClick={() => handleStatusChange('completed')}
+                      disabled={saving}
+                    >
+                      ✓ Marcar Completada
+                    </Button>
+                  )}
+                  {(reservation.status === 'pending' || reservation.status === 'confirmed') && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        if (window.confirm('¿Estás seguro de cancelar esta reserva?')) {
+                          handleStatusChange('cancelled');
+                        }
+                      }}
+                      disabled={saving}
+                      className="text-danger border-danger"
+                    >
+                      × Cancelar Reserva
+                    </Button>
+                  )}
+                </div>
+              </div>
             </CardBody>
           </Card>
 
@@ -297,9 +354,20 @@ export const ReservationDetailPage = () => {
                 options={paymentOptions}
                 disabled={saving}
               />
-              <small className="text-muted d-block mt-2">
-                Actualiza el estado del pago
-              </small>
+              
+              {reservation.paymentStatus !== 'paid' && (
+                <div className="mt-3">
+                  <Button 
+                    variant="success" 
+                    size="sm"
+                    fullWidth
+                    onClick={() => handlePaymentStatusChange('paid')}
+                    disabled={saving}
+                  >
+                    💵 Marcar como Pagado
+                  </Button>
+                </div>
+              )}
             </CardBody>
           </Card>
 

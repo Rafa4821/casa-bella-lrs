@@ -56,6 +56,13 @@ export const AdminHeader = () => {
             </div>
           </div>
           <button 
+            className="btn btn-outline-primary btn-sm me-2"
+            onClick={() => window.open('/', '_blank')}
+            title="Ver sitio web"
+          >
+            🌐 Ver Sitio
+          </button>
+          <button 
             className="btn btn-outline-danger btn-sm"
             onClick={handleLogout}
             title="Cerrar sesión"

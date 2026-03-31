@@ -94,7 +94,7 @@ export const ReservationsPage = () => {
       key: 'code',
       label: 'Código',
       render: (row) => (
-        <div className="font-monospace text-muted small">{row.reservationCode}</div>
+        <div className="font-monospace small" style={{ color: '#6c757d' }}>{row.reservationCode}</div>
       ),
     },
     {
@@ -102,8 +102,8 @@ export const ReservationsPage = () => {
       label: 'Huésped',
       render: (row) => (
         <div>
-          <div className="fw-semibold">{row.guestName}</div>
-          <small className="text-muted">{row.guestEmail}</small>
+          <div className="fw-semibold" style={{ color: 'var(--bs-body-color)' }}>{row.guestName}</div>
+          <small style={{ color: '#6c757d' }}>{row.guestEmail}</small>
         </div>
       ),
     },
@@ -112,10 +112,10 @@ export const ReservationsPage = () => {
       label: 'Fechas',
       render: (row) => (
         <div>
-          <div className="small">
+          <div className="small" style={{ color: 'var(--bs-body-color)' }}>
             {formatDate(row.checkInDate.toDate())}
           </div>
-          <small className="text-muted">
+          <small style={{ color: '#6c757d' }}>
             hasta {formatDate(row.checkOutDate.toDate())}
           </small>
         </div>
@@ -125,14 +125,14 @@ export const ReservationsPage = () => {
       key: 'nights',
       label: 'Noches',
       render: (row) => (
-        <div className="text-center">{row.numberOfNights}</div>
+        <div className="text-center" style={{ color: 'var(--bs-body-color)' }}>{row.numberOfNights}</div>
       ),
     },
     {
       key: 'guests',
       label: 'Huéspedes',
       render: (row) => (
-        <div className="text-center">{row.numberOfGuests}</div>
+        <div className="text-center" style={{ color: 'var(--bs-body-color)' }}>{row.numberOfGuests}</div>
       ),
     },
     {
@@ -149,7 +149,7 @@ export const ReservationsPage = () => {
       key: 'total',
       label: 'Total',
       render: (row) => (
-        <div className="fw-semibold">{formatPrice(row.totalAmount)}</div>
+        <div className="fw-semibold" style={{ color: 'var(--bs-body-color)' }}>{formatPrice(row.totalAmount)}</div>
       ),
     },
     {

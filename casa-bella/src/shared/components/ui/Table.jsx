@@ -61,7 +61,7 @@ export const DataTable = ({
         <thead>
           <tr>
             {columns.map((column, index) => (
-              <th key={index} scope="col" style={{ width: column.width }}>
+              <th key={index} scope="col" style={{ width: column.width, color: 'var(--bs-body-color)' }}>
                 {column.label}
               </th>
             ))}
@@ -82,7 +82,7 @@ export const DataTable = ({
                 style={{ cursor: onRowClick ? 'pointer' : 'default' }}
               >
                 {columns.map((column, colIndex) => (
-                  <td key={colIndex}>
+                  <td key={colIndex} style={{ color: 'var(--bs-body-color)' }}>
                     {column.render ? column.render(row) : row[column.key]}
                   </td>
                 ))}
