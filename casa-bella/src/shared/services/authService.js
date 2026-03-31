@@ -80,10 +80,29 @@ export const signOutAdmin = async () => {
  */
 export const onAuthChange = (callback) => {
   return onAuthStateChanged(auth, async (user) => {
+    console.log('onAuthChange: Auth state changed, user:', user?.email || 'null');
+    
     if (user) {
-      const adminDoc = await findDocumentByField(COLLECTIONS.ADMINS, 'email', user.email);
-      
-      if (adminDoc && adminDoc.isActive) {
+      try {
+        console.log('onAuthChange: Looking up admin document for', user.email);
+        const adminDoc = await findDocumentByField(COLLECTIONS.ADMINS, 'email', user.email);
+        console.log('onAuthChange: Admin document result:', adminDoc);
+        
+        if (!adminDoc) {
+          console.error('onAuthChange: No admin document found for', user.email);
+          await signOut(auth);
+          callback(null);
+          return;
+        }
+        
+        if (!adminDoc.isActive) {
+          console.error('onAuthChange: Admin account is inactive for', user.email);
+          await signOut(auth);
+          callback(null);
+          return;
+        }
+        
+        console.log('onAuthChange: Admin verified successfully');
         callback({
           id: user.uid,
           email: user.email,
@@ -91,11 +110,14 @@ export const onAuthChange = (callback) => {
           role: adminDoc.role,
           active: adminDoc.isActive,
         });
-      } else {
-        await signOut(auth);
+      } catch (error) {
+        console.error('onAuthChange: Error verifying admin:', error);
+        // Don't sign out on error - might be temporary network issue
+        // Let user stay logged in but set loading state
         callback(null);
       }
     } else {
+      console.log('onAuthChange: No user, clearing auth state');
       callback(null);
     }
   });

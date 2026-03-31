@@ -61,10 +61,13 @@ service cloud.firestore {
       request.resource.data.endDate is timestamp;
     }
 
-    // Admins collection - only admins can read/write
+    // Admins collection - authenticated users can read to verify admin status
     match /admins/{adminId} {
-      allow read: if isAdmin();
-      allow write: if false; // Admins can only be created manually
+      // Allow authenticated users to read admins collection (needed for admin verification)
+      allow read: if isAuthenticated();
+      // Only allow updates/deletes by admins, no creates (created manually)
+      allow update, delete: if isAdmin();
+      allow create: if false; // Admins can only be created manually in Firebase Console
     }
 
     // Settings collection - read by anyone, write by admins only
