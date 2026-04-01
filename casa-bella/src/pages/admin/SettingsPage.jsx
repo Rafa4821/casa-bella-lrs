@@ -11,14 +11,19 @@ import {
   ErrorAlert,
 } from '../../shared/components/ui';
 import { getSettings, updateSettings } from '../../shared/services/settingsService';
+import { uploadLogo, deleteLogo } from '../../shared/services/storageService';
 
 export const SettingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
+    // Branding
+    logoUrl: '',
+    
     // Información de Contacto
     contactEmail: '',
     contactPhone: '',
@@ -68,6 +73,7 @@ export const SettingsPage = () => {
       const settings = await getSettings();
       if (settings) {
         setFormData({
+          logoUrl: settings.logoUrl || '',
           contactEmail: settings.contactEmail || '',
           contactPhone: settings.contactPhone || '',
           whatsappNumber: settings.whatsappNumber || '',
@@ -123,6 +129,49 @@ export const SettingsPage = () => {
     });
   };
 
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      setError(null);
+
+      // Delete old logo if exists
+      if (formData.logoUrl) {
+        await deleteLogo(formData.logoUrl);
+      }
+
+      // Upload new logo
+      const logoUrl = await uploadLogo(file);
+      
+      setFormData({ ...formData, logoUrl });
+      setSuccess('Logo cargado correctamente');
+      setUploading(false);
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      setError(error.message || 'Error al cargar el logo');
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveLogo = async () => {
+    if (!formData.logoUrl) return;
+    
+    if (!window.confirm('¿Estás seguro de eliminar el logo?')) {
+      return;
+    }
+
+    try {
+      await deleteLogo(formData.logoUrl);
+      setFormData({ ...formData, logoUrl: '' });
+      setSuccess('Logo eliminado correctamente');
+    } catch (error) {
+      console.error('Error removing logo:', error);
+      setError('Error al eliminar el logo');
+    }
+  };
+
   if (loading) {
     return <Loading message="Cargando configuración..." />;
   }
@@ -146,6 +195,73 @@ export const SettingsPage = () => {
 
       <form onSubmit={handleSubmit}>
         <div className="row g-4">
+          <div className="col-12">
+            <Card hover={false}>
+              <CardHeader>
+                <h5 className="mb-0">🎨 Identidad de Marca</h5>
+              </CardHeader>
+              <CardBody>
+                <div className="row align-items-center">
+                  <div className="col-md-8">
+                    <label className="form-label fw-semibold">Logo del Sitio Web</label>
+                    <p className="text-muted small mb-3">
+                      Este logo aparecerá en la esquina superior izquierda del sitio web y en los correos de confirmación.
+                      Formatos aceptados: JPG, PNG, WebP, SVG. Tamaño máximo: 2MB.
+                    </p>
+                    <div className="d-flex gap-2">
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp,image/svg+xml"
+                        onChange={handleLogoUpload}
+                        disabled={uploading}
+                        className="form-control"
+                        style={{ maxWidth: '300px' }}
+                      />
+                      {formData.logoUrl && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleRemoveLogo}
+                          disabled={uploading}
+                        >
+                          🗑️ Eliminar
+                        </Button>
+                      )}
+                    </div>
+                    {uploading && (
+                      <small className="text-primary d-block mt-2">
+                        ⏳ Subiendo logo...
+                      </small>
+                    )}
+                  </div>
+                  <div className="col-md-4">
+                    {formData.logoUrl ? (
+                      <div className="text-center">
+                        <p className="text-muted small mb-2">Vista previa:</p>
+                        <div className="p-3 bg-light rounded">
+                          <img
+                            src={formData.logoUrl}
+                            alt="Logo preview"
+                            style={{
+                              maxWidth: '200px',
+                              maxHeight: '80px',
+                              objectFit: 'contain'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center text-muted">
+                        <p className="small mb-0">No hay logo cargado</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+          
           <div className="col-lg-6">
             <Card hover={false}>
               <CardHeader>

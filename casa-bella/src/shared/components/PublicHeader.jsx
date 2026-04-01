@@ -1,9 +1,26 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getSettings } from '../services/settingsService';
 
 export const PublicHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState('');
   const location = useLocation();
+
+  useEffect(() => {
+    loadLogo();
+  }, []);
+
+  const loadLogo = async () => {
+    try {
+      const settings = await getSettings();
+      if (settings?.logoUrl) {
+        setLogoUrl(settings.logoUrl);
+      }
+    } catch (error) {
+      console.error('Error loading logo:', error);
+    }
+  };
 
   const isActive = (path) => location.pathname === path;
 
@@ -21,12 +38,26 @@ export const PublicHeader = () => {
       <nav className="navbar navbar-expand-lg navbar-light py-3">
         <div className="container">
           <Link className="navbar-brand" to="/">
-            <span className="fw-bold text-primary" style={{ fontSize: '1.5rem', letterSpacing: '-0.02em' }}>
-              Casa Bella
-            </span>
-            <span className="d-block text-muted" style={{ fontSize: '0.75rem', marginTop: '-0.25rem' }}>
-              Los Roques, Venezuela
-            </span>
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt="Casa Bella"
+                style={{
+                  maxHeight: '50px',
+                  maxWidth: '200px',
+                  objectFit: 'contain',
+                }}
+              />
+            ) : (
+              <>
+                <span className="fw-bold text-primary" style={{ fontSize: '1.5rem', letterSpacing: '-0.02em' }}>
+                  Casa Bella
+                </span>
+                <span className="d-block text-muted" style={{ fontSize: '0.75rem', marginTop: '-0.25rem' }}>
+                  Los Roques, Venezuela
+                </span>
+              </>
+            )}
           </Link>
           
           <button

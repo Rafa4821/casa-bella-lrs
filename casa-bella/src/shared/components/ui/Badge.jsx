@@ -28,19 +28,30 @@ export const Badge = ({
 
 export const StatusBadge = ({ status }) => {
   const statusConfig = {
-    pending: { variant: 'warning', label: 'Pendiente' },
-    confirmed: { variant: 'success', label: 'Confirmada' },
-    cancelled: { variant: 'danger', label: 'Cancelada' },
-    completed: { variant: 'info', label: 'Completada' },
-    active: { variant: 'success', label: 'Activo' },
-    inactive: { variant: 'secondary', label: 'Inactivo' },
+    pending: { bg: '#ffc107', color: '#000', label: 'Pendiente' },
+    confirmed: { bg: '#28a745', color: '#fff', label: 'Confirmada' },
+    cancelled: { bg: '#dc3545', color: '#fff', label: 'Cancelada' },
+    completed: { bg: '#17a2b8', color: '#fff', label: 'Completada' },
+    active: { bg: '#28a745', color: '#fff', label: 'Activo' },
+    inactive: { bg: '#6c757d', color: '#fff', label: 'Inactivo' },
+    paid: { bg: '#28a745', color: '#fff', label: 'Pagado' },
+    unpaid: { bg: '#dc3545', color: '#fff', label: 'No Pagado' },
   };
 
-  const config = statusConfig[status] || { variant: 'secondary', label: status };
+  const config = statusConfig[status] || { bg: '#6c757d', color: '#fff', label: status };
 
   return (
-    <Badge variant={config.variant} pill>
+    <span
+      className="badge rounded-pill"
+      style={{
+        backgroundColor: config.bg,
+        color: config.color,
+        padding: '0.35em 0.65em',
+        fontSize: '0.75rem',
+        fontWeight: '500',
+      }}
+    >
       {config.label}
-    </Badge>
+    </span>
   );
 };

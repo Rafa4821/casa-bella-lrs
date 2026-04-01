@@ -22,6 +22,8 @@ export const ReservationsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadReservations();
@@ -89,7 +91,67 @@ export const ReservationsPage = () => {
     setFilteredReservations(filtered);
   };
 
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedIds(filteredReservations.map(r => r.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    
+    if (!window.confirm(`¿Estás seguro de eliminar ${selectedIds.length} reserva(s)? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      const { deleteReservation } = await import('../../shared/services/reservationsService');
+      
+      await Promise.all(selectedIds.map(id => deleteReservation(id)));
+      
+      setSelectedIds([]);
+      await loadReservations();
+      setDeleting(false);
+    } catch (error) {
+      console.error('Error deleting reservations:', error);
+      alert('Error al eliminar las reservas. Por favor intenta de nuevo.');
+      setDeleting(false);
+    }
+  };
+
   const columns = [
+    {
+      key: 'select',
+      label: (
+        <input
+          type="checkbox"
+          checked={selectedIds.length === filteredReservations.length && filteredReservations.length > 0}
+          onChange={handleSelectAll}
+          style={{ cursor: 'pointer' }}
+        />
+      ),
+      render: (row) => (
+        <input
+          type="checkbox"
+          checked={selectedIds.includes(row.id)}
+          onChange={(e) => {
+            e.stopPropagation();
+            handleSelectOne(row.id);
+          }}
+          onClick={(e) => e.stopPropagation()}
+          style={{ cursor: 'pointer' }}
+        />
+      ),
+    },
     {
       key: 'code',
       label: 'Código',
@@ -196,8 +258,23 @@ export const ReservationsPage = () => {
           <h2 className="mb-1">Reservas</h2>
           <p className="text-muted mb-0">
             {filteredReservations.length} de {reservations.length} reservas
+            {selectedIds.length > 0 && (
+              <span className="ms-2 text-primary">
+                · {selectedIds.length} seleccionada{selectedIds.length > 1 ? 's' : ''}
+              </span>
+            )}
           </p>
         </div>
+        {selectedIds.length > 0 && (
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={handleBulkDelete}
+            disabled={deleting}
+          >
+            {deleting ? '🗑️ Eliminando...' : `🗑️ Eliminar ${selectedIds.length} reserva${selectedIds.length > 1 ? 's' : ''}`}
+          </Button>
+        )}
       </div>
 
       <Card hover={false} className="mb-4">
