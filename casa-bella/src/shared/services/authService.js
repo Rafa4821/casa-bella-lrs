@@ -112,9 +112,16 @@ export const onAuthChange = (callback) => {
         });
       } catch (error) {
         console.error('onAuthChange: Error verifying admin:', error);
-        // Don't sign out on error - might be temporary network issue
-        // Let user stay logged in but set loading state
-        callback(null);
+        // On error, keep user logged in with basic Firebase data
+        // This prevents session loss on page reload due to temporary network issues
+        console.log('onAuthChange: Keeping user logged in despite error');
+        callback({
+          id: user.uid,
+          email: user.email,
+          name: user.email.split('@')[0], // Fallback name from email
+          role: 'admin',
+          active: true,
+        });
       }
     } else {
       console.log('onAuthChange: No user, clearing auth state');

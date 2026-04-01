@@ -9,6 +9,7 @@ import { ServiciosPage } from '../pages/public/ServiciosPage';
 import { GaleriaPage } from '../pages/public/GaleriaPage';
 import { ContactoPage } from '../pages/public/ContactoPage';
 import { ReservarPage } from '../pages/public/ReservarPage';
+import { ReservationConfirmationPage } from '../pages/public/ReservationConfirmationPage';
 import { NotFoundPage } from '../pages/public/NotFoundPage';
 import { DashboardPage } from '../pages/admin/DashboardPage';
 import { ReservationsPage } from '../pages/admin/ReservationsPage';
@@ -50,6 +51,10 @@ export const router = createBrowserRouter([
       {
         path: 'reservar',
         element: <ReservarPage />,
+      },
+      {
+        path: 'confirmacion',
+        element: <ReservationConfirmationPage />,
       },
     ],
   },

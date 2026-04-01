@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   HeroMinimal, 
   Card, 
@@ -17,6 +18,7 @@ import { useReservation } from '../../shared/hooks/useReservation';
 import { formatDate, formatPrice } from '../../shared/utils/reservationHelpers';
 
 export const ReservarPage = () => {
+  const navigate = useNavigate();
   const {
     formData,
     updateFormData,
@@ -49,7 +51,22 @@ export const ReservarPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await submitReservation();
+    const result = await submitReservation();
+    
+    if (result) {
+      // Navigate to confirmation page with reservation data
+      const params = new URLSearchParams({
+        code: result.code,
+        email: result.email,
+        checkIn: result.checkIn,
+        checkOut: result.checkOut,
+        nights: result.nights.toString(),
+        guests: result.guests.toString(),
+        total: result.total.toString(),
+        payment: result.payment,
+      });
+      navigate(`/confirmacion?${params.toString()}`);
+    }
   };
 
   const nextStep = () => {

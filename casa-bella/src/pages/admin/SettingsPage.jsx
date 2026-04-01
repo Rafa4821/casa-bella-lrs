@@ -145,8 +145,17 @@ export const SettingsPage = () => {
       // Upload new logo
       const logoUrl = await uploadLogo(file);
       
-      setFormData({ ...formData, logoUrl });
-      setSuccess('Logo cargado correctamente');
+      // Update formData state
+      const updatedFormData = { ...formData, logoUrl };
+      setFormData(updatedFormData);
+      
+      // Save to Firestore immediately
+      await updateSettings({
+        ...updatedFormData,
+        minimumNights: parseInt(updatedFormData.minimumNights),
+      });
+      
+      setSuccess('Logo cargado y guardado correctamente');
       setUploading(false);
     } catch (error) {
       console.error('Error uploading logo:', error);
@@ -163,12 +172,25 @@ export const SettingsPage = () => {
     }
 
     try {
+      setUploading(true);
       await deleteLogo(formData.logoUrl);
-      setFormData({ ...formData, logoUrl: '' });
+      
+      // Update formData state
+      const updatedFormData = { ...formData, logoUrl: '' };
+      setFormData(updatedFormData);
+      
+      // Save to Firestore immediately
+      await updateSettings({
+        ...updatedFormData,
+        minimumNights: parseInt(updatedFormData.minimumNights),
+      });
+      
       setSuccess('Logo eliminado correctamente');
+      setUploading(false);
     } catch (error) {
       console.error('Error removing logo:', error);
       setError('Error al eliminar el logo');
+      setUploading(false);
     }
   };
 

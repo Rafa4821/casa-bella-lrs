@@ -11,6 +11,19 @@ import {
   isValidPhone,
 } from '../utils/reservationHelpers';
 
+/**
+ * Get payment method label
+ */
+const getPaymentMethodLabel = (method) => {
+  const labels = {
+    transfer: 'Transferencia Bancaria',
+    zelle: 'Zelle',
+    paypal: 'PayPal',
+    cash: 'Efectivo al llegar',
+  };
+  return labels[method] || method;
+};
+
 export const useReservation = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -259,6 +272,19 @@ export const useReservation = () => {
       setSuccess(true);
       setLoading(false);
 
+      // Prepare data for confirmation page
+      const confirmationData = {
+        id: reservationId,
+        code,
+        email: reservationData.guestEmail,
+        checkIn: reservationData.checkInDate.toISOString(),
+        checkOut: reservationData.checkOutDate.toISOString(),
+        nights: reservationData.numberOfNights,
+        guests: reservationData.numberOfGuests,
+        total: reservationData.totalAmount,
+        payment: getPaymentMethodLabel(reservationData.paymentMethod),
+      };
+
       setFormData({
         checkIn: '',
         checkOut: '',
@@ -272,7 +298,7 @@ export const useReservation = () => {
       });
       setPricing(null);
 
-      return { id: reservationId, code };
+      return confirmationData;
     } catch (err) {
       console.error('Error creating reservation:', err);
       setError(err.message || 'Error al crear la reserva. Por favor intenta de nuevo.');
