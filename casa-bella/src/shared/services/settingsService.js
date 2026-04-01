@@ -43,6 +43,15 @@ export const createSettings = async (data) => {
  * @returns {Promise<void>}
  */
 export const updateSettings = async (data) => {
+  // Check if settings document exists
+  const existingSettings = await getSettings();
+  
+  if (!existingSettings) {
+    // Create default settings first
+    await getOrCreateSettings();
+  }
+  
+  // Now update with the provided data
   await updateDocument(COLLECTIONS.SETTINGS, SETTINGS_DOC_ID, data);
 };
 
