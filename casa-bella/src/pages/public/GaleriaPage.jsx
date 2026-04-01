@@ -1,10 +1,37 @@
-import { useState } from 'react';
-import { HeroMinimal, Button } from '../../shared/components/ui';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { HeroMinimal, Card, CardBody, Button, Loading } from '../../shared/components/ui';
+import { useSettings } from '../../shared/hooks/useSettings';
+import { getGalleryImages, getGalleryCategories, createDefaultCategories } from '../../shared/services/galleryService';
 
 export const GaleriaPage = () => {
+  const { getWhatsAppUrl } = useSettings();
   const [activeCategory, setActiveCategory] = useState('all');
+  const [images, setImages] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const categories = [
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      await createDefaultCategories();
+      const [imagesData, categoriesData] = await Promise.all([
+        getGalleryImages(),
+        getGalleryCategories(),
+      ]);
+      setImages(imagesData);
+      setCategories(categoriesData.length > 0 ? categoriesData : defaultCategories);
+    } catch (error) {
+      console.error('Error loading gallery:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const defaultCategories = [
     { id: 'all', label: 'Todo' },
     { id: 'exterior', label: 'Exterior' },
     { id: 'habitaciones', label: 'Habitaciones' },
@@ -12,7 +39,11 @@ export const GaleriaPage = () => {
     { id: 'playas', label: 'Playas' },
   ];
 
-  const images = [
+  if (loading) {
+    return <Loading message="Cargando galería..." />;
+  }
+
+  const defaultImages = [
     {
       id: 1,
       src: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800',
@@ -87,9 +118,13 @@ export const GaleriaPage = () => {
     },
   ];
 
-  const filteredImages = activeCategory === 'all'
-    ? images
-    : images.filter((img) => img.category === activeCategory);
+  // Use real images if available, otherwise use default images
+  const displayImages = images.length > 0 ? images : defaultImages;
+  
+  // Filter by category
+  const filteredImages = activeCategory === 'all' 
+    ? displayImages 
+    : displayImages.filter(img => img.category === activeCategory);
 
   return (
     <>
@@ -142,8 +177,8 @@ export const GaleriaPage = () => {
                   }}
                 >
                   <img
-                    src={image.src}
-                    alt={image.alt}
+                    src={image.imageUrl || image.src}
+                    alt={image.title || image.alt || 'Gallery image'}
                     className="position-absolute top-0 start-0 w-100 h-100"
                     style={{
                       objectFit: 'cover',
@@ -200,12 +235,16 @@ export const GaleriaPage = () => {
                 en Los Roques es una nueva aventura esperando por ti.
               </p>
               <div className="d-flex gap-3 flex-wrap">
-                <Button variant="primary">
-                  Reservar Ahora
-                </Button>
-                <Button variant="outline">
-                  Ver 360°
-                </Button>
+                <Link to="/reservar">
+                  <Button variant="primary">
+                    Reservar Ahora
+                  </Button>
+                </Link>
+                <a href="#" onClick={(e) => { e.preventDefault(); alert('Próximamente: Tour virtual 360°'); }}>
+                  <Button variant="outline">
+                    Ver 360°
+                  </Button>
+                </a>
               </div>
             </div>
             <div className="col-lg-6">
@@ -247,12 +286,16 @@ export const GaleriaPage = () => {
             Haz realidad tus vacaciones soñadas en Casa Bella
           </p>
           <div className="d-flex gap-3 justify-content-center flex-wrap">
-            <Button variant="secondary" size="lg">
-              Consultar Disponibilidad
-            </Button>
-            <Button variant="outline" size="lg" className="btn-outline-light">
-              💬 Contactar por WhatsApp
-            </Button>
+            <Link to="/reservar">
+              <Button variant="secondary" size="lg">
+                Consultar Disponibilidad
+              </Button>
+            </Link>
+            <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="lg" className="btn-outline-light">
+                💬 Contactar por WhatsApp
+              </Button>
+            </a>
           </div>
         </div>
       </section>

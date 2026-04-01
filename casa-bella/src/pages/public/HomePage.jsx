@@ -1,7 +1,29 @@
-import { Hero, FeatureGrid, Card, CardBody, Button } from '../../shared/components/ui';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Hero, FeatureGrid, Card, CardBody, Button, Loading } from '../../shared/components/ui';
+import { getOrCreateHomeContent } from '../../shared/services/homeContentService';
 
 export const HomePage = () => {
-  const features = [
+  const [content, setContent] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
+    try {
+      const data = await getOrCreateHomeContent();
+      setContent(data);
+    } catch (error) {
+      console.error('Error loading content:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fallback features if content not loaded
+  const defaultFeatures = [
     {
       icon: '🏖️',
       title: 'Ubicación Privilegiada',
@@ -19,7 +41,7 @@ export const HomePage = () => {
     },
   ];
 
-  const testimonials = [
+  const defaultTestimonials = [
     {
       text: 'Una experiencia maravillosa. Las instalaciones son impecables y la atención excepcional.',
       author: 'María González',
@@ -37,21 +59,48 @@ export const HomePage = () => {
     },
   ];
 
+  if (loading) {
+    return <Loading message="Cargando página..." />;
+  }
+
+  const features = content?.features || defaultFeatures;
+  const testimonials = content?.testimonials || defaultTestimonials;
+  const hero = content?.hero || {
+    title: 'Bienvenido a Casa Bella',
+    subtitle: 'Tu refugio paradisíaco en Los Roques, Venezuela',
+    backgroundImage: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1600'
+  };
+  const discover = content?.discoverSection || {
+    title: 'Descubre el paraíso caribeño',
+    description: 'Casa Bella te ofrece la combinación perfecta entre confort, naturaleza y hospitalidad.',
+    benefits: [
+      'Acceso directo a playas paradisíacas',
+      'Habitaciones con vista al mar',
+      'Servicio personalizado 24/7',
+      'Actividades acuáticas y excursiones'
+    ],
+    image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800'
+  };
+
   return (
     <>
       <Hero
-        title="Bienvenido a Casa Bella"
-        subtitle="Tu refugio paradisíaco en Los Roques, Venezuela"
+        title={hero.title}
+        subtitle={hero.subtitle}
         height="600px"
-        backgroundImage="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1600"
+        backgroundImage={hero.backgroundImage}
       >
         <div className="d-flex gap-3 justify-content-center flex-wrap">
-          <Button size="lg" variant="primary">
-            Reservar Ahora
-          </Button>
-          <Button size="lg" variant="secondary">
-            Ver Habitaciones
-          </Button>
+          <Link to="/reservar">
+            <Button size="lg" variant="primary">
+              Reservar Ahora
+            </Button>
+          </Link>
+          <Link to="/habitaciones">
+            <Button size="lg" variant="secondary">
+              Ver Habitaciones
+            </Button>
+          </Link>
         </div>
       </Hero>
 
@@ -107,37 +156,27 @@ export const HomePage = () => {
         <div className="container">
           <div className="row align-items-center">
             <div className="col-lg-6 mb-4 mb-lg-0">
-              <h2 className="mb-4">Descubre el paraíso caribeño</h2>
+              <h2 className="mb-4">{discover.title}</h2>
               <p className="text-secondary mb-4">
-                Casa Bella te ofrece la combinación perfecta entre confort, naturaleza y hospitalidad. 
-                Ubicados en el archipiélago de Los Roques, te esperamos para brindarte una experiencia 
-                única en uno de los destinos más hermosos del Caribe.
+                {discover.description}
               </p>
               <ul className="list-unstyled mb-4">
-                <li className="mb-2">
-                  <span className="text-primary me-2">✓</span>
-                  Acceso directo a playas paradisíacas
-                </li>
-                <li className="mb-2">
-                  <span className="text-primary me-2">✓</span>
-                  Habitaciones con vista al mar
-                </li>
-                <li className="mb-2">
-                  <span className="text-primary me-2">✓</span>
-                  Servicio personalizado 24/7
-                </li>
-                <li className="mb-2">
-                  <span className="text-primary me-2">✓</span>
-                  Actividades acuáticas y excursiones
-                </li>
+                {discover.benefits.map((benefit, index) => (
+                  <li key={index} className="mb-2">
+                    <span className="text-primary me-2">✓</span>
+                    {benefit}
+                  </li>
+                ))}
               </ul>
-              <Button variant="primary">Conoce más</Button>
+              <Link to="/la-posada">
+                <Button variant="primary">Conoce más</Button>
+              </Link>
             </div>
             <div className="col-lg-6">
               <div className="position-relative">
                 <img
-                  src="https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800"
-                  alt="Los Roques"
+                  src={discover.image}
+                  alt={discover.title}
                   className="img-fluid rounded shadow-premium"
                   style={{ objectFit: 'cover', height: '500px', width: '100%' }}
                 />
@@ -153,9 +192,11 @@ export const HomePage = () => {
           <p className="lead mb-4 opacity-90">
             Reserva ahora y asegura tu lugar en el paraíso
           </p>
-          <Button variant="secondary" size="lg">
-            Hacer una reservación
-          </Button>
+          <Link to="/reservar">
+            <Button variant="secondary" size="lg">
+              Hacer una reservación
+            </Button>
+          </Link>
         </div>
       </section>
     </>

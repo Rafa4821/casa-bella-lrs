@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Card, CardBody, Button } from '../../shared/components/ui';
 import { formatDate, formatPrice } from '../../shared/utils/reservationHelpers';
+import { useSettings } from '../../shared/hooks/useSettings';
 
 export const ReservationConfirmationPage = () => {
+  const { getWhatsAppUrl } = useSettings();
   const [searchParams] = useSearchParams();
   const [reservationData, setReservationData] = useState(null);
 
@@ -188,7 +190,7 @@ export const ReservationConfirmationPage = () => {
                 </p>
                 <div className="d-flex gap-2 justify-content-center flex-wrap">
                   <a 
-                    href="https://wa.me/584141234567" 
+                    href={getWhatsAppUrl()} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="btn btn-success btn-sm"

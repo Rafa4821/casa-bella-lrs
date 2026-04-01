@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSettings } from '../../shared/hooks/useSettings';
 import { 
   HeroMinimal, 
   Card, 
@@ -13,12 +14,14 @@ import {
   ErrorAlert,
   InfoAlert,
   Loading,
+  AvailabilityCalendar,
 } from '../../shared/components/ui';
 import { useReservation } from '../../shared/hooks/useReservation';
 import { formatDate, formatPrice } from '../../shared/utils/reservationHelpers';
 
 export const ReservarPage = () => {
   const navigate = useNavigate();
+  const { getWhatsAppUrl, getWhatsAppDisplay } = useSettings();
   const {
     formData,
     updateFormData,
@@ -226,6 +229,23 @@ export const ReservarPage = () => {
                               Capacidad para hasta 8 personas en 4 habitaciones matrimoniales.
                             </div>
                           </div>
+                        </div>
+
+                        <div className="mb-4">
+                          <h6 className="mb-3">Calendario de Disponibilidad</h6>
+                          <AvailabilityCalendar
+                            selectedCheckIn={formData.checkIn}
+                            selectedCheckOut={formData.checkOut}
+                            onDateSelect={(date) => {
+                              const dateStr = date.toISOString().split('T')[0];
+                              if (!formData.checkIn || formData.checkOut) {
+                                updateFormData('checkIn', dateStr);
+                                updateFormData('checkOut', '');
+                              } else {
+                                updateFormData('checkOut', dateStr);
+                              }
+                            }}
+                          />
                         </div>
 
                         <div className="row">
@@ -476,7 +496,7 @@ export const ReservarPage = () => {
                     )}
                   </div>
 
-                  <Button variant="outline" fullWidth onClick={() => window.open('https://wa.me/584141234567', '_blank')}>
+                  <Button variant="outline" fullWidth onClick={() => window.open(getWhatsAppUrl(), '_blank')}>
                     💬 Consultar por WhatsApp
                   </Button>
                 </CardBody>
@@ -546,7 +566,7 @@ export const ReservarPage = () => {
           </p>
           <div className="d-flex gap-3 justify-content-center flex-wrap">
             <Button variant="secondary" size="lg">
-              💬 WhatsApp: +58 414 XXX XXXX
+              💬 WhatsApp: {getWhatsAppDisplay()}
             </Button>
             <Button variant="outline" size="lg" className="btn-outline-light">
               📧 Enviar Email

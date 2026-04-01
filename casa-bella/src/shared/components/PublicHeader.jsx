@@ -37,27 +37,26 @@ export const PublicHeader = () => {
     <header className="bg-white shadow-sm sticky-top">
       <nav className="navbar navbar-expand-lg navbar-light py-3">
         <div className="container">
-          <Link className="navbar-brand" to="/">
-            {logoUrl ? (
+          <Link className="navbar-brand d-flex align-items-center gap-2" to="/">
+            {logoUrl && (
               <img
                 src={logoUrl}
-                alt="Casa Bella"
+                alt="Casa Bella Logo"
                 style={{
-                  maxHeight: '50px',
-                  maxWidth: '200px',
+                  maxHeight: '45px',
+                  maxWidth: '45px',
                   objectFit: 'contain',
                 }}
               />
-            ) : (
-              <>
-                <span className="fw-bold text-primary" style={{ fontSize: '1.5rem', letterSpacing: '-0.02em' }}>
-                  Casa Bella
-                </span>
-                <span className="d-block text-muted" style={{ fontSize: '0.75rem', marginTop: '-0.25rem' }}>
-                  Los Roques, Venezuela
-                </span>
-              </>
             )}
+            <div>
+              <span className="fw-bold text-primary d-block" style={{ fontSize: '1.5rem', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
+                Casa Bella
+              </span>
+              <span className="text-muted" style={{ fontSize: '0.75rem' }}>
+                Los Roques, Venezuela
+              </span>
+            </div>
           </Link>
           
           <button

@@ -3,6 +3,9 @@ export const COLLECTIONS = {
   AMENITIES: 'amenities',
   RESERVATIONS: 'reservations',
   RATES: 'rates',
-  BLOCKED_DATES: 'blockedDates',
+  BLOCKED_DATES: 'blocked-dates',
   ADMINS: 'admins',
+  CONTENT: 'content',
+  ROOMS: 'rooms',
+  GALLERY: 'gallery',
 };

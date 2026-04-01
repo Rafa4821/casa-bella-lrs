@@ -1,7 +1,34 @@
-import { useState } from 'react';
-import { HeroMinimal, Card, CardBody, Input, TextArea, Button } from '../../shared/components/ui';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { HeroMinimal, Card, CardBody, Input, TextArea, Button, SuccessAlert, ErrorAlert, Loading } from '../../shared/components/ui';
+import { useSettings } from '../../shared/hooks/useSettings';
+import { getOrCreateFAQs } from '../../shared/services/faqsService';
 
 export const ContactoPage = () => {
+  const { getWhatsAppUrl, getWhatsAppDisplay, contactEmail, contactPhone, address } = useSettings();
+  const [activeQuestion, setActiveQuestion] = useState(null);
+  const [faqs, setFaqs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadFAQs();
+  }, []);
+
+  const loadFAQs = async () => {
+    try {
+      const data = await getOrCreateFAQs();
+      setFaqs(data);
+    } catch (error) {
+      console.error('Error loading FAQs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <Loading message="Cargando..." />;
+  };
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -29,34 +56,34 @@ export const ContactoPage = () => {
     {
       icon: '📱',
       title: 'WhatsApp',
-      value: '+58 414 XXX XXXX',
-      link: 'https://wa.me/584141234567',
+      value: getWhatsAppDisplay(),
+      link: getWhatsAppUrl(),
       action: 'Escribir mensaje',
     },
     {
       icon: '📧',
       title: 'Email',
-      value: 'info@casabellalrs.com',
-      link: 'mailto:info@casabellalrs.com',
-      action: 'Enviar correo',
+      value: contactEmail,
+      link: `mailto:${contactEmail}`,
+      action: 'Enviar email',
     },
     {
-      icon: '📘',
-      title: 'Facebook',
-      value: '@CasaBellaLRS',
-      link: 'https://facebook.com/casabellalrs',
-      action: 'Visitar página',
+      icon: '�',
+      title: 'Teléfono',
+      value: contactPhone,
+      link: `tel:${contactPhone.replace(/\s/g, '')}`,
+      action: 'Llamar ahora',
     },
     {
-      icon: '📷',
-      title: 'Instagram',
-      value: '@casabellalrs',
-      link: 'https://instagram.com/casabellalrs',
-      action: 'Ver perfil',
+      icon: '�',
+      title: 'Dirección',
+      value: address,
+      link: null,
+      action: null,
     },
   ];
 
-  const faqs = [
+  const defaultFaqs = [
     {
       question: '¿Cómo funciona la reserva?',
       answer: 'Casa Bella se reserva completa, no por habitaciones individuales. La reserva incluye las 4 habitaciones matrimoniales para hasta 8 personas.',
@@ -74,6 +101,8 @@ export const ContactoPage = () => {
       answer: 'Los Roques solo es accesible por avión desde Caracas. Podemos ayudarte a coordinar vuelos y traslados.',
     },
   ];
+
+  const displayFaqs = faqs.length > 0 ? faqs : defaultFaqs;
 
   return (
     <>
@@ -224,7 +253,7 @@ export const ContactoPage = () => {
                     variant="secondary"
                     size="lg"
                     fullWidth
-                    onClick={() => window.open('https://wa.me/584141234567', '_blank')}
+                    onClick={() => window.open(getWhatsAppUrl(), '_blank')}
                   >
                     💬 Abrir WhatsApp
                   </Button>
@@ -247,7 +276,7 @@ export const ContactoPage = () => {
           <div className="row justify-content-center">
             <div className="col-lg-8">
               <div className="d-flex flex-column gap-3">
-                {faqs.map((faq, index) => (
+                {displayFaqs.map((faq, index) => (
                   <Card key={index} hover={false}>
                     <CardBody>
                       <h5 className="text-primary mb-3">{faq.question}</h5>
@@ -316,9 +345,11 @@ export const ContactoPage = () => {
           <p className="lead mb-4 opacity-90">
             Contáctanos ahora y asegura tu lugar en el paraíso
           </p>
-          <Button variant="secondary" size="lg">
-            Hacer una Reservación
-          </Button>
+          <Link to="/reservar">
+            <Button variant="secondary" size="lg">
+              Hacer una Reservación
+            </Button>
+          </Link>
         </div>
       </section>
     </>

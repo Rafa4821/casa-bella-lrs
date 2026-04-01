@@ -1,7 +1,30 @@
-import { HeroMinimal, FeatureGrid, Card, CardBody, Button } from '../../shared/components/ui';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { HeroMinimal, FeatureGrid, Card, CardBody, Button, Loading } from '../../shared/components/ui';
+import { useSettings } from '../../shared/hooks/useSettings';
+import { getOrCreateLaPosadaContent } from '../../shared/services/laPosadaContentService';
 
 export const LaPosadaPage = () => {
-  const features = [
+  const { getWhatsAppUrl } = useSettings();
+  const [content, setContent] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
+    try {
+      const data = await getOrCreateLaPosadaContent();
+      setContent(data);
+    } catch (error) {
+      console.error('Error loading content:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const defaultFeatures = [
     {
       icon: '🏠',
       title: 'Casa Completa',
@@ -19,7 +42,7 @@ export const LaPosadaPage = () => {
     },
   ];
 
-  const amenities = [
+  const defaultAmenities = [
     'WiFi de alta velocidad',
     'Aire acondicionado en todas las habitaciones',
     'Cocina completamente equipada',
@@ -30,11 +53,38 @@ export const LaPosadaPage = () => {
     'Servicio de limpieza diario',
   ];
 
+  if (loading) {
+    return <Loading message="Cargando página..." />;
+  }
+
+  const hero = content?.hero || {
+    title: 'Tu experiencia exclusiva en Los Roques',
+    subtitle: 'Reserva completa de la casa',
+    backgroundImage: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1600'
+  };
+  const description = content?.description || {
+    title: 'La experiencia Casa Bella',
+    paragraphs: [
+      'Casa Bella es más que una posada, es tu hogar temporal en uno de los archipiélagos más hermosos del Caribe venezolano.',
+      'Ofrecemos la reserva completa de la casa, garantizando total privacidad y exclusividad para ti y tu grupo.'
+    ],
+    image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800'
+  };
+  const features = content?.features || defaultFeatures;
+  const amenities = content?.amenities || defaultAmenities;
+  const sharedSpaces = content?.sharedSpaces || [];
+  const location = content?.location || {
+    title: 'Ubicación privilegiada',
+    description: 'Casa Bella está estratégicamente ubicada en Gran Roque.',
+    points: [],
+    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800'
+  };
+
   return (
     <>
       <HeroMinimal
-        title="La Posada"
-        subtitle="Tu hogar en el paraíso de Los Roques"
+        title={hero.title}
+        subtitle={hero.subtitle}
         breadcrumb={[
           { label: 'Inicio', link: '/' },
           { label: 'La Posada' },
@@ -63,9 +113,11 @@ export const LaPosadaPage = () => {
                   frente al mar hasta cada detalle de nuestras instalaciones, todo está pensado para que 
                   tu estadía sea perfecta.
                 </p>
-                <Button variant="primary" size="lg">
-                  Reservar Ahora
-                </Button>
+                <Link to="/reservar">
+                  <Button variant="primary" size="lg">
+                    Reservar Ahora
+                  </Button>
+                </Link>
               </div>
             </div>
             <div className="col-lg-6">
@@ -169,7 +221,9 @@ export const LaPosadaPage = () => {
                     <strong>A pasos de</strong> los muelles para excursiones
                   </li>
                 </ul>
-                <Button variant="outline">Ver en el mapa</Button>
+                <Link to="/contacto">
+                  <Button variant="outline">Ver en el mapa</Button>
+                </Link>
               </div>
             </div>
             <div className="col-lg-6 order-lg-1">
@@ -191,12 +245,16 @@ export const LaPosadaPage = () => {
             Contáctanos y asegura tu reserva exclusiva
           </p>
           <div className="d-flex gap-3 justify-content-center flex-wrap">
-            <Button variant="secondary" size="lg">
-              Reservar Ahora
-            </Button>
-            <Button variant="outline" size="lg" className="btn-outline-light">
-              💬 WhatsApp
-            </Button>
+            <Link to="/reservar">
+              <Button variant="secondary" size="lg">
+                Reservar Ahora
+              </Button>
+            </Link>
+            <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="lg" className="btn-outline-light">
+                💬 WhatsApp
+              </Button>
+            </a>
           </div>
         </div>
       </section>

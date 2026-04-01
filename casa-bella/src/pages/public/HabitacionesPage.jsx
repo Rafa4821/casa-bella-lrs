@@ -1,7 +1,33 @@
-import { HeroMinimal, Grid, GridItem, Card, CardBody, CardImage, Button, Badge } from '../../shared/components/ui';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { HeroMinimal, Grid, GridItem, Card, CardBody, CardImage, Button, Badge, Loading } from '../../shared/components/ui';
+import { getRooms, createDefaultRooms } from '../../shared/services/roomsService';
 
 export const HabitacionesPage = () => {
-  const rooms = [
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadRooms();
+  }, []);
+
+  const loadRooms = async () => {
+    try {
+      await createDefaultRooms();
+      const data = await getRooms();
+      setRooms(data);
+    } catch (error) {
+      console.error('Error loading rooms:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <Loading message="Cargando habitaciones..." />;
+  }
+
+  const defaultRooms = [
     {
       id: 1,
       name: 'Habitación Vista al Mar',
@@ -212,9 +238,11 @@ export const HabitacionesPage = () => {
                   Servicio personalizado y atención dedicada
                 </li>
               </ul>
-              <Button variant="primary" size="lg">
-                Consultar Disponibilidad
-              </Button>
+              <Link to="/reservar">
+                <Button variant="primary" size="lg">
+                  Consultar Disponibilidad
+                </Button>
+              </Link>
             </div>
             <div className="col-lg-6">
               <div className="row g-3">

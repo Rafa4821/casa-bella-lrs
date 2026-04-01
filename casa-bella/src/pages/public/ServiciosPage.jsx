@@ -1,7 +1,43 @@
-import { HeroMinimal, FeatureGrid, Card, CardBody, Button } from '../../shared/components/ui';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { HeroMinimal, FeatureGrid, Card, CardBody, Button, Badge, Loading } from '../../shared/components/ui';
+import { useSettings } from '../../shared/hooks/useSettings';
+import { getOrCreateServiciosContent } from '../../shared/services/serviciosContentService';
 
 export const ServiciosPage = () => {
-  const services = [
+  const { getWhatsAppUrl } = useSettings();
+  const [content, setContent] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
+    try {
+      const data = await getOrCreateServiciosContent();
+      setContent(data);
+    } catch (error) {
+      console.error('Error loading content:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <Loading message="Cargando servicios..." />;
+  }
+
+  const hero = content?.hero || {
+    title: 'Servicios y Comodidades',
+    subtitle: 'Todo lo que necesitas para unas vacaciones perfectas',
+    backgroundImage: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1600'
+  };
+  const includedServices = content?.includedServices || [];
+  const additionalServices = content?.additionalServices || [];
+  const recommendations = content?.recommendations || [];
+
+  const defaultServices = [
     {
       icon: '🏠',
       title: 'Alojamiento Exclusivo',
@@ -177,9 +213,11 @@ export const ServiciosPage = () => {
               <strong>Nota:</strong> Los servicios adicionales están sujetos a disponibilidad y deben 
               reservarse con anticipación.
             </p>
-            <Button variant="primary">
-              Solicitar Información
-            </Button>
+            <Link to="/contacto">
+              <Button variant="primary">
+                Solicitar Información
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -259,12 +297,16 @@ export const ServiciosPage = () => {
             Contáctanos y te ayudaremos a planificar tu estadía perfecta
           </p>
           <div className="d-flex gap-3 justify-content-center flex-wrap">
-            <Button variant="secondary" size="lg">
-              Reservar Ahora
-            </Button>
-            <Button variant="outline" size="lg" className="btn-outline-light">
-              💬 Escribir por WhatsApp
-            </Button>
+            <Link to="/reservar">
+              <Button variant="secondary" size="lg">
+                Reservar Ahora
+              </Button>
+            </Link>
+            <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="lg" className="btn-outline-light">
+                💬 Escribir por WhatsApp
+              </Button>
+            </a>
           </div>
         </div>
       </section>

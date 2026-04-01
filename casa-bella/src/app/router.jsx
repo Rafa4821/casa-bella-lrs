@@ -17,6 +17,12 @@ import { ReservationDetailPage } from '../pages/admin/ReservationDetailPage';
 import { RatesPage } from '../pages/admin/RatesPage';
 import { BlockedDatesPage } from '../pages/admin/BlockedDatesPage';
 import { SettingsPage } from '../pages/admin/SettingsPage';
+import { HomeContentPage } from '../pages/admin/content/HomeContentPage';
+import { LaPosadaContentPage } from '../pages/admin/content/LaPosadaContentPage';
+import { ServiciosContentPage } from '../pages/admin/content/ServiciosContentPage';
+import { RoomsPage } from '../pages/admin/RoomsPage';
+import { GalleryPage } from '../pages/admin/GalleryPage';
+import { FAQsPage } from '../pages/admin/FAQsPage';
 import { LoginPage } from '../pages/admin/LoginPage';
 
 export const router = createBrowserRouter([
@@ -93,6 +99,30 @@ export const router = createBrowserRouter([
       {
         path: 'configuracion',
         element: <SettingsPage />,
+      },
+      {
+        path: 'contenido/inicio',
+        element: <HomeContentPage />,
+      },
+      {
+        path: 'contenido/la-posada',
+        element: <LaPosadaContentPage />,
+      },
+      {
+        path: 'habitaciones',
+        element: <RoomsPage />,
+      },
+      {
+        path: 'contenido/servicios',
+        element: <ServiciosContentPage />,
+      },
+      {
+        path: 'galeria',
+        element: <GalleryPage />,
+      },
+      {
+        path: 'faqs',
+        element: <FAQsPage />,
       },
     ],
   },

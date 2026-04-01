@@ -19,6 +19,17 @@ export const AdminSidebar = () => {
       ],
     },
     {
+      section: 'Contenido',
+      items: [
+        { to: '/admin/contenido/inicio', label: 'Página Inicio', icon: '🏠' },
+        { to: '/admin/contenido/la-posada', label: 'Página La Posada', icon: '🏛️' },
+        { to: '/admin/habitaciones', label: 'Habitaciones', icon: '🛏️' },
+        { to: '/admin/contenido/servicios', label: 'Página Servicios', icon: '⚡' },
+        { to: '/admin/galeria', label: 'Galería', icon: '📸' },
+        { to: '/admin/faqs', label: 'Preguntas Frecuentes', icon: '❓' },
+      ],
+    },
+    {
       section: 'Configuración',
       items: [
         { to: '/admin/configuracion', label: 'Configuración', icon: '⚙️' },
